@@ -5,11 +5,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Button
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -22,6 +20,7 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.maps.android.compose.*
+import kotlinx.coroutines.launch
 
 @Composable
 fun LocationScreen(location: Location?, locationAvailable: Boolean,
@@ -50,20 +49,28 @@ fun LocationScreen(location: Location?, locationAvailable: Boolean,
     }
 
     val dataStoreManager = remember { DataStoreManager(context) }
-
+    val coroutineScope = rememberCoroutineScope()
     val lifecycleOwner = LocalLifecycleOwner.current
-    val dataState = dataStoreManager
-        .dataFlow
+
+    val dataTrafficState = dataStoreManager
+        .dataTrafficFlow
         .collectAsStateWithLifecycle(
-            initialValue = "",
+            initialValue = false,
+            lifecycle = lifecycleOwner.lifecycle
+        )
+    val dataLocationState = dataStoreManager
+        .dataLocationFlow
+        .collectAsStateWithLifecycle(
+            initialValue = false,
             lifecycle = lifecycleOwner.lifecycle
         )
 
     val mapUiSettings = MapUiSettings(
-        // TODO – set arguments
+        myLocationButtonEnabled = dataLocationState.value
     )
     val mapProperties = MapProperties(
-        // TODO – set arguments
+        isTrafficEnabled = dataTrafficState.value,
+        isMyLocationEnabled = dataLocationState.value
     )
 
     Column(modifier = Modifier.fillMaxWidth(),
@@ -76,6 +83,16 @@ fun LocationScreen(location: Location?, locationAvailable: Boolean,
         Button(onClick = onGetLocation, enabled = locationAvailable) {
             Text(text = "Get Current Location")
         }
+
+        Switch(checked = dataTrafficState.value,
+            onCheckedChange = {
+                coroutineScope.launch { dataStoreManager.setTrafficData(it) }
+            })
+        Switch(checked = dataLocationState.value,
+            onCheckedChange = {
+                coroutineScope.launch { dataStoreManager.setLocationData(it) }
+            })
+
         GoogleMap(
             modifier = Modifier.fillMaxSize(),
             cameraPositionState = cameraPositionState,

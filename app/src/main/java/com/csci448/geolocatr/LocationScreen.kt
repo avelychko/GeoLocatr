@@ -1,9 +1,7 @@
 package com.csci448.geolocatr
 
 import android.location.Location
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -14,6 +12,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
@@ -84,14 +83,23 @@ fun LocationScreen(location: Location?, locationAvailable: Boolean,
             Text(text = "Get Current Location")
         }
 
-        Switch(checked = dataTrafficState.value,
-            onCheckedChange = {
-                coroutineScope.launch { dataStoreManager.setTrafficData(it) }
-            })
-        Switch(checked = dataLocationState.value,
-            onCheckedChange = {
-                coroutineScope.launch { dataStoreManager.setLocationData(it) }
-            })
+        Row(modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(text = "Traffic", Modifier.padding(5.dp))
+                Switch(checked = dataTrafficState.value,
+                    onCheckedChange = {
+                        coroutineScope.launch { dataStoreManager.setTrafficData(it) }
+                    })
+            }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(text = "My Location", Modifier.padding(5.dp))
+                Switch(checked = dataLocationState.value,
+                    onCheckedChange = {
+                        coroutineScope.launch { dataStoreManager.setLocationData(it) }
+                    })
+            }
+        }
 
         GoogleMap(
             modifier = Modifier.fillMaxSize(),

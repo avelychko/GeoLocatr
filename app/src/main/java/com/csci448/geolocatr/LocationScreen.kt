@@ -23,7 +23,8 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun LocationScreen(location: Location?, locationAvailable: Boolean,
-                   onGetLocation: () -> Unit, address: String) {
+                   onGetLocation: () -> Unit, address: String,
+                   onNotify: (Location) -> Unit) {
 
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(LatLng(0.0, 0.0), 0f)
@@ -82,6 +83,10 @@ fun LocationScreen(location: Location?, locationAvailable: Boolean,
         Button(onClick = onGetLocation, enabled = locationAvailable) {
             Text(text = "Get Current Location")
         }
+        Button(
+            enabled = (location != null),
+            onClick = { onNotify(location!!) }
+        ) {  }
 
         Row(modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween) {
@@ -138,5 +143,5 @@ private fun PreviewLocationScreen() {
             addressState.value = "Singapore"
         },
         address = addressState.value
-    )
+    ) {}
 }

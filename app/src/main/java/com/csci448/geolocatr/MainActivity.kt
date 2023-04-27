@@ -71,7 +71,7 @@ class MainActivity : ComponentActivity() {
                                 permissionLauncher)
                         },
                         address = addressState.value
-                    )
+                    ) {}
                 }
             }
         }
@@ -104,5 +104,5 @@ fun DefaultPreview() {
             addressState.value = "Singapore"
         },
         address = addressState.value
-    )
+    ) {}
 }

@@ -82,7 +82,7 @@ class LocationAlarmReceiver : BroadcastReceiver() {
 
     fun checkPermissionAndScheduleAlarm(
         activity: Activity,
-        permissionLauncher: ActivityResultLauncher<String>
+        permissionLauncher: ActivityResultLauncher<Array<String>>
     ) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             Log.d(LOG_TAG, "running on Version Tiramisu or newer, need permission")
@@ -98,7 +98,7 @@ class LocationAlarmReceiver : BroadcastReceiver() {
                 // display toast with reason
                 } else {
                     Log.d(LOG_TAG, "request notification permission")
-                    permissionLauncher.launch( android.Manifest.permission.POST_NOTIFICATIONS )
+                    permissionLauncher.launch(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS))
                 }
             }
         } else {

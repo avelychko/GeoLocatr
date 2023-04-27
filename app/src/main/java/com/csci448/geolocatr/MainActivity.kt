@@ -14,6 +14,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.csci448.geolocatr.ui.theme.GeoLocatrTheme
 import com.google.android.gms.location.LocationSettingsStates
 
@@ -23,6 +26,10 @@ class MainActivity : ComponentActivity() {
     private lateinit var locationLauncher: ActivityResultLauncher<IntentSenderRequest>
     private val locationAlarmReceiver = LocationAlarmReceiver()
     private	lateinit var notificationPermissionLauncher: ActivityResultLauncher<Array<String>>
+
+    companion object {
+        private const val ROUTE_LOCATION = "location"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         locationUtility = LocationUtility(this@MainActivity)
@@ -71,19 +78,32 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    LocationScreen(
-                        location = locationState.value,
-                        locationAvailable = isLocationAvailableState.value,
-                        onGetLocation = {
-                            locationUtility.checkPermissionAndGetLocation(this@MainActivity,
-                                locationPermissionLauncher)
-                        },
-                        address = addressState.value,
-                    onNotify = { lastLocation ->
-                        locationAlarmReceiver.lastLocation = lastLocation
-                        locationAlarmReceiver.checkPermissionAndScheduleAlarm(
-                            this@MainActivity, notificationPermissionLauncher)
-                    } )
+                    val navHostController = rememberNavController()
+                    NavHost(
+                        navController = navHostController,
+                        startDestination = ROUTE_LOCATION
+                    ) {
+                        composable(
+                            route = ROUTE_LOCATION
+                        ) {
+                            LocationScreen(
+                                location = locationState.value,
+                                locationAvailable = isLocationAvailableState.value,
+                                onGetLocation = {
+                                    locationUtility.checkPermissionAndGetLocation(
+                                        this@MainActivity,
+                                        locationPermissionLauncher
+                                    )
+                                },
+                                address = addressState.value,
+                                onNotify = { lastLocation ->
+                                    locationAlarmReceiver.lastLocation = lastLocation
+                                    locationAlarmReceiver.checkPermissionAndScheduleAlarm(
+                                        this@MainActivity, notificationPermissionLauncher
+                                    )
+                                })
+                        }
+                    }
                 }
             }
         }

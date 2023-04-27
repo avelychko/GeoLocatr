@@ -13,6 +13,9 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.GeoLocatr"
+        android:name=".LocationAlarmReceiver"
+        android:exported="true"
+        android:enabled="true"
         tools:targetApi="31">
         <meta-data android:name="com.google.android.geo.API_KEY"
             android:value="${MAPS_API_KEY}" />
@@ -23,7 +26,7 @@
             android:theme="@style/Theme.GeoLocatr">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
+                <action android:name="448_ALARM_ACTION" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

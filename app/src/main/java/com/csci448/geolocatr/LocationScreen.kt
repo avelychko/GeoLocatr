@@ -30,8 +30,10 @@ fun LocationScreen(location: Location?, locationAvailable: Boolean,
         position = CameraPosition.fromLatLngZoom(LatLng(0.0, 0.0), 0f)
     }
 
+    val mapReadyState = remember { mutableStateOf(false) }
+
     val context = LocalContext.current
-    LaunchedEffect(location) {
+    LaunchedEffect(location, mapReadyState.value) {
         if(location != null) {
             // include all points that should be within the bounds of the zoom
             // convex hull
@@ -80,7 +82,8 @@ fun LocationScreen(location: Location?, locationAvailable: Boolean,
                 + (location?.longitude ?: "").toString())
         Text(text = "Address:")
         Text(text = address, textAlign = TextAlign.Center)
-        Row() {
+        Row(modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly) {
             Button(onClick = onGetLocation, enabled = locationAvailable) {
                 Text(text = "Get Current Location")
             }
@@ -112,7 +115,8 @@ fun LocationScreen(location: Location?, locationAvailable: Boolean,
             modifier = Modifier.fillMaxSize(),
             cameraPositionState = cameraPositionState,
             uiSettings = mapUiSettings,
-            properties = mapProperties
+            properties = mapProperties,
+            onMapLoaded = { mapReadyState.value = true }
         ) {
             if(location != null) {
                 val markerState = MarkerState().apply {

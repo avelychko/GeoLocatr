@@ -89,8 +89,8 @@ class LocationAlarmReceiver : BroadcastReceiver() {
             val channelName = "ChannelName"
             val channelDesc = "This channel is for..."
             val notificationTitle = "You Are Here!"
-            val lat = 0.0;
-            val long = 0.0;
+            val lat = intent.getDoubleExtra(EXTRA_LATITUDE, 0.0);
+            val long = intent.getDoubleExtra(EXTRA_LONGITUDE, 0.0);
             val notificationText = "You are at $lat/$long."
 
             val channel =

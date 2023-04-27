@@ -152,4 +152,9 @@ class LocationUtility(context: Context) {
     fun removeLocationRequest() {
         fusedLocationProviderClient.removeLocationUpdates(locationCallback)
     }
+
+    //Lab 12b Part 2
+    fun setStartingLocation(location: Location?) {
+        mCurrentLocationStateFlow.value = location
+    }
 }

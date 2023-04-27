@@ -14,9 +14,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.csci448.geolocatr.ui.theme.GeoLocatrTheme
 import com.google.android.gms.location.LocationSettingsStates
 
@@ -29,6 +31,8 @@ class MainActivity : ComponentActivity() {
 
     companion object {
         private const val ROUTE_LOCATION = "location"
+        private const val ARG_LATITUDE = "lat"
+        private const val ARG_LONGITUDE = "long"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -84,8 +88,28 @@ class MainActivity : ComponentActivity() {
                         startDestination = ROUTE_LOCATION
                     ) {
                         composable(
-                            route = ROUTE_LOCATION
-                        ) {
+                            route = ROUTE_LOCATION,
+                            arguments = listOf(
+                                navArgument(name = ARG_LATITUDE) {
+                                    type = NavType.StringType
+                                    nullable = true
+                                },
+                                navArgument(name = ARG_LONGITUDE) {
+                                    type = NavType.StringType
+                                    nullable = true
+                                }
+                            )
+                        ) { navBackStackEntry -> navBackStackEntry.arguments?.let { args ->
+                            val lat = args.getString(ARG_LATITUDE)?.toDoubleOrNull()
+                            val long = args.getString(ARG_LONGITUDE)?.toDoubleOrNull()
+                            if (lat != null && long != null) {
+                                val startingLocation = Location("").apply {
+                                    latitude = lat
+                                    longitude = long
+                                }
+                                locationUtility.setStartingLocation(startingLocation)
+                            }
+                        }
                             LocationScreen(
                                 location = locationState.value,
                                 locationAvailable = isLocationAvailableState.value,

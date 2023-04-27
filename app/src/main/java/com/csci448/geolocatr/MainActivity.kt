@@ -1,5 +1,9 @@
 package com.csci448.geolocatr
 
+import android.app.PendingIntent
+import android.app.TaskStackBuilder
+import android.content.Context
+import android.content.Intent
 import android.location.Location
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -13,12 +17,14 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
 import com.csci448.geolocatr.ui.theme.GeoLocatrTheme
 import com.google.android.gms.location.LocationSettingsStates
 
@@ -33,6 +39,44 @@ class MainActivity : ComponentActivity() {
         private const val ROUTE_LOCATION = "location"
         private const val ARG_LATITUDE = "lat"
         private const val ARG_LONGITUDE = "long"
+        private const val SCHEME = "https"
+        private const val HOST = "geolocatr.labs.csci448.mines.edu"
+        private const val BASE_URI = "$SCHEME://$HOST"
+
+        private fun formatUriString(location: Location? = null): String {
+            val uriStringBuilder = StringBuilder()
+            uriStringBuilder.append(BASE_URI)
+            uriStringBuilder.append("/$ROUTE_LOCATION/")
+            if (location == null) {
+                uriStringBuilder.append("{$ARG_LATITUDE}")
+            } else {
+                uriStringBuilder.append(location.latitude)
+            }
+            uriStringBuilder.append("/")
+            if (location == null) {
+                uriStringBuilder.append("{$ARG_LONGITUDE}")
+            } else {
+                uriStringBuilder.append(location.longitude)
+            }
+            return uriStringBuilder.toString()
+        }
+
+        fun createPendingIntent(context: Context, location: Location):
+                PendingIntent {
+            val deepLinkIntent = Intent(
+                Intent.ACTION_VIEW,
+                formatUriString(location).toUri(),
+                context,
+                MainActivity::class.java
+            )
+            return TaskStackBuilder.create(context).run {
+                addNextIntentWithParentStack(deepLinkIntent)
+                getPendingIntent(
+                    0,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+            }
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,7 +84,8 @@ class MainActivity : ComponentActivity() {
         locationPermissionLauncher =
             registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
                 // process if permissions were granted
-                locationUtility.checkPermissionAndGetLocation(this@MainActivity, locationPermissionLauncher)
+                locationUtility.checkPermissionAndGetLocation(this@MainActivity,
+                    locationPermissionLauncher)
             }
 
         locationLauncher = registerForActivityResult(
@@ -57,7 +102,8 @@ class MainActivity : ComponentActivity() {
         notificationPermissionLauncher =
             registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
                 // process if permissions were granted
-                locationAlarmReceiver.checkPermissionAndScheduleAlarm(this@MainActivity, notificationPermissionLauncher)
+                locationAlarmReceiver.checkPermissionAndScheduleAlarm(this@MainActivity,
+                    notificationPermissionLauncher)
             }
 
         super.onCreate(savedInstanceState)
@@ -98,6 +144,9 @@ class MainActivity : ComponentActivity() {
                                     type = NavType.StringType
                                     nullable = true
                                 }
+                            ),
+                            deepLinks = listOf(
+                                navDeepLink { uriPattern = formatUriString() }
                             )
                         ) { navBackStackEntry -> navBackStackEntry.arguments?.let { args ->
                             val lat = args.getString(ARG_LATITUDE)?.toDoubleOrNull()

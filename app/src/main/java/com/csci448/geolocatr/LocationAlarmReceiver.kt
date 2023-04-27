@@ -89,7 +89,9 @@ class LocationAlarmReceiver : BroadcastReceiver() {
             val channelName = "ChannelName"
             val channelDesc = "This channel is for..."
             val notificationTitle = "You Are Here!"
-            val notificationText = "You are at ${intent.extras}."
+            val lat = 0.0;
+            val long = 0.0;
+            val notificationText = "You are at $lat/$long."
 
             val channel =
                 NotificationChannel(
@@ -101,10 +103,19 @@ class LocationAlarmReceiver : BroadcastReceiver() {
                 }
             notificationManager.createNotificationChannel(channel)
 
+            val startingLocation = Location("").apply {
+                latitude = lat
+                longitude = long
+            }
+            val deepLinkPendingIntent = MainActivity
+                .createPendingIntent(context, startingLocation)
+
             val notification = NotificationCompat.Builder(context, channelID)
                 .setSmallIcon(android.R.drawable.ic_dialog_map)
                 .setContentTitle(notificationTitle)
                 .setContentText(notificationText)
+                .setContentIntent(deepLinkPendingIntent)
+                .setAutoCancel(true)
                 .build()
 
             notificationManager.notify(0, notification)

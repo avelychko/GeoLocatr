@@ -21,6 +21,7 @@ class MainActivity : ComponentActivity() {
     private	lateinit var locationUtility: LocationUtility
     private	lateinit var permissionLauncher: ActivityResultLauncher<Array<String>>
     private lateinit var locationLauncher: ActivityResultLauncher<IntentSenderRequest>
+    private val locationAlarmReceiver = LocationAlarmReceiver()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         locationUtility = LocationUtility(this@MainActivity)
@@ -70,8 +71,11 @@ class MainActivity : ComponentActivity() {
                             locationUtility.checkPermissionAndGetLocation(this@MainActivity,
                                 permissionLauncher)
                         },
-                        address = addressState.value
-                    ) {}
+                        address = addressState.value,
+                    onNotify = { lastLocation ->
+                        locationAlarmReceiver.lastLocation = lastLocation
+                        locationAlarmReceiver.scheduleAlarm(this@MainActivity)
+                    } )
                 }
             }
         }

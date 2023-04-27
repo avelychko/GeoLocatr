@@ -80,13 +80,15 @@ fun LocationScreen(location: Location?, locationAvailable: Boolean,
                 + (location?.longitude ?: "").toString())
         Text(text = "Address:")
         Text(text = address, textAlign = TextAlign.Center)
-        Button(onClick = onGetLocation, enabled = locationAvailable) {
-            Text(text = "Get Current Location")
+        Row() {
+            Button(onClick = onGetLocation, enabled = locationAvailable) {
+                Text(text = "Get Current Location")
+            }
+            Button(
+                enabled = (location != null),
+                onClick = { onNotify(location!!) }
+            ) {  Text(text = "Notify Me Later") }
         }
-        Button(
-            enabled = (location != null),
-            onClick = { onNotify(location!!) }
-        ) {  }
 
         Row(modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween) {
